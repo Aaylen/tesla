@@ -1,7 +1,6 @@
 const puppeteer = require("puppeteer");
 const fs = require("fs");
 const path = require("path");
-const { execSync } = require("child_process");
 const nodemailer = require("nodemailer");
 
 const TARGET_URL = "https://txmccs.txdmv.gov/automated-vehicles/operators";
@@ -138,27 +137,6 @@ async function scrape() {
         // Send Email Notification
         await sendEmailNotification(previousData, newData);
 
-        // Commit and Push back to Git if data changed
-        try {
-            console.log("Committing changes back to Git...");
-            if (isGithubAction) {
-                execSync('git config --global user.name "github-actions[bot]"');
-                execSync('git config --global user.email "github-actions[bot]@users.noreply.github.com"');
-            }
-            execSync('git add data.json');
-            
-            // Check if there are changes in data.json to commit
-            const status = execSync('git status --porcelain data.json').toString().trim();
-            if (status) {
-                execSync('git commit -m "Update scraped data [skip ci]"');
-                execSync('git push');
-                console.log("Successfully pushed to remote.");
-            } else {
-                console.log("No changes in data.json to commit.");
-            }
-        } catch (err) {
-            console.error("Failed to commit and push changes:", err);
-        }
     } else {
         console.log("No changes detected.");
     }
