@@ -1,0 +1,35 @@
+name: TxMCCS Scraper
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # Runs once an hour
+  workflow_dispatch:     # Allows manual trigger
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write     # Allows committing back to repo
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci || npm install
+
+      - name: Install Puppeteer system dependencies
+        run: npx puppeteer browsers install chrome
+
+      - name: Run Scraper
+        run: node txmccs_scraper.js
+        env:
+          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+          TO_EMAIL: ${{ secrets.TO_EMAIL }}

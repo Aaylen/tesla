@@ -1,0 +1,25 @@
+{
+  "name": "tesla",
+  "version": "1.0.0",
+  "description": "",
+  "main": "txmccs_scraper.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Aaylen/tesla.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Aaylen/tesla/issues"
+  },
+  "homepage": "https://github.com/Aaylen/tesla#readme",
+  "dependencies": {
+    "nodemailer": "^6.9.13",
+    "puppeteer": "^25.1.0"
+  }
+}
