@@ -16,7 +16,7 @@ if (fs.existsSync(DATA_FILE)) {
     }
 }
 
-async function sendEmailNotification(previous, current) {
+aasync function sendEmailNotification(previous, current) {
     const username = process.env.MAIL_USERNAME;
     const password = process.env.MAIL_PASSWORD;
     const toEmail = process.env.TO_EMAIL;
@@ -37,16 +37,43 @@ async function sendEmailNotification(previous, current) {
         },
     });
 
+    // 1. Extract dates from the objects (fallback to 'N/A' if missing)
+    const prevDate = previous.timestamp || "Previous Date";
+    const currDate = current.timestamp || "New Date";
+
+    // 2. Calculate differences for the header announcement
+    const waymoDiff = (current.Waymo || 0) - (previous.Waymo || 0);
+    const zooxDiff = (current.Zoox || 0) - (previous.Zoox || 0);
+    const teslaDiff = (current.Tesla || 0) - (previous.Tesla || 0);
+
+    // 3. Build a dynamic announcement string based on what changed
+    let announcement = "";
+    if (waymoDiff > 0) announcement += `Waymo added ${waymoDiff} cars!\n`;
+    if (zooxDiff > 0) announcement += `Zoox added ${zooxDiff} cars!\n`;
+    if (teslaDiff > 0) announcement += `Tesla added ${teslaDiff} cars!\n`;
+    
+    // Fallback if numbers didn't go up, but data still technically changed
+    if (!announcement) announcement = "Data updated with new counts!\n";
+
+    // 4. Construct the cleanly formatted text email
+    const emailText = `${announcement}
+---------------------------------------------
+
+Old Data (${prevDate})
+Waymo: ${previous.Waymo ?? 0}
+Zoox: ${previous.Zoox ?? 0}
+Tesla: ${previous.Tesla ?? 0}
+
+New Data (${currDate})
+Waymo: ${current.Waymo ?? 0}
+Zoox: ${current.Zoox ?? 0}
+Tesla: ${current.Tesla ?? 0}`;
+
     const mailOptions = {
         from: `"TxMCCS Scraper" <${username}>`,
         to: toEmail,
         subject: "TxMCCS Scraper: Data Changed",
-        text: `
-Previous Data:
-${JSON.stringify(previous, null, 2)}
-
-New Data:
-${JSON.stringify(current, null, 2)}`,
+        text: emailText,
     };
 
     try {
@@ -121,6 +148,7 @@ async function scrape() {
     const ZooxTotalCars = await getTotalCars(page, "ZOOX");
 
     const newData = {
+        timestamp: new Date().toLocaleDateString(), // Generates "6/1/2026" depending on system locale
         Tesla: TeslaTotalCars,
         Waymo: WaymoTotalCars,
         Zoox: ZooxTotalCars,
