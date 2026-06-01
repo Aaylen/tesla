@@ -16,7 +16,7 @@ if (fs.existsSync(DATA_FILE)) {
     }
 }
 
-aasync function sendEmailNotification(previous, current) {
+async function sendEmailNotification(previous, current) {
     const username = process.env.MAIL_USERNAME;
     const password = process.env.MAIL_PASSWORD;
     const toEmail = process.env.TO_EMAIL;
@@ -48,9 +48,9 @@ aasync function sendEmailNotification(previous, current) {
 
     // 3. Build a dynamic announcement string based on what changed
     let announcement = "";
-    if (waymoDiff > 0) announcement += `Waymo added ${waymoDiff} cars!\n`;
-    if (zooxDiff > 0) announcement += `Zoox added ${zooxDiff} cars!\n`;
-    if (teslaDiff > 0) announcement += `Tesla added ${teslaDiff} cars!\n`;
+    if (waymoDiff > 0) announcement += `Waymo added ${waymoDiff} cars to their Texas fleet!\n`;
+    if (zooxDiff > 0) announcement += `Zoox added ${zooxDiff} cars to their Texas fleet!\n`;
+    if (teslaDiff > 0) announcement += `Tesla added ${teslaDiff} cars to their Texas fleet!\n`;
     
     // Fallback if numbers didn't go up, but data still technically changed
     if (!announcement) announcement = "Data updated with new counts!\n";
