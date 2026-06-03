@@ -84,6 +84,42 @@ Tesla: ${current.Tesla ?? 0}`;
     }
 }
 
+async function sendErrorEmail(error) {
+    const username = process.env.MAIL_USERNAME;
+    const password = process.env.MAIL_PASSWORD;
+    const toEmail = process.env.TO_EMAIL;
+
+    if (!username || !password || !toEmail) {
+        console.log("SMTP environment variables are not fully configured. Skipping error email notification.");
+        return;
+    }
+
+    console.log("Sending error email notification...");
+    const transporter = nodemailer.createTransport({
+        host: "smtp.gmail.com",
+        port: 465,
+        secure: true,
+        auth: {
+            user: username,
+            pass: password,
+        },
+    });
+
+    const mailOptions = {
+        from: `"TxMCCS Scraper" <${username}>`,
+        to: toEmail,
+        subject: "TxMCCS Scraper: Error Encountered",
+        text: `The TxMCCS Scraper encountered an error during execution:\n\n${error.stack || error.message || error}`,
+    };
+
+    try {
+        const info = await transporter.sendMail(mailOptions);
+        console.log("Error email sent successfully:", info.messageId);
+    } catch (err) {
+        console.error("Failed to send error email:", err);
+    }
+}
+
 async function getTotalCars(page, companyName) {
     // Navigate to the page
     console.log(`Navigating to ${TARGET_URL}...`);
@@ -156,8 +192,10 @@ async function scrape() {
 
     console.log(JSON.stringify(newData, null, 2));
 
-    // Check if data changed
-    const hasChanged = JSON.stringify(newData) !== JSON.stringify(previousData);
+    // Check if data changed (ignoring timestamp)
+    const { timestamp: _newTs, ...newDataCompare } = newData;
+    const { timestamp: _prevTs, ...previousDataCompare } = previousData;
+    const hasChanged = JSON.stringify(newDataCompare) !== JSON.stringify(previousDataCompare);
     if (hasChanged) {
         console.log("Data changed! Writing to data.json...");
         fs.writeFileSync(DATA_FILE, JSON.stringify(newData, null, 2), "utf8");
@@ -173,7 +211,8 @@ async function scrape() {
     console.log("\nDone.");
 }
 
-scrape().catch((err) => {
+scrape().catch(async (err) => {
     console.error("Scraper failed:", err);
+    await sendErrorEmail(err);
     process.exit(1);
 });
