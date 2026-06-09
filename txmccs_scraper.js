@@ -57,17 +57,20 @@ async function sendEmailNotification(previous, current) {
 
     // 4. Construct the cleanly formatted text email
     const emailText = `${announcement}
----------------------------------------------
 
 Old Data (${prevDate})
 Waymo: ${previous.Waymo ?? 0}
-Zoox: ${previous.Zoox ?? 0}
 Tesla: ${previous.Tesla ?? 0}
+Zoox: ${previous.Zoox ?? 0}
 
 New Data (${currDate})
 Waymo: ${current.Waymo ?? 0}
-Zoox: ${current.Zoox ?? 0}
-Tesla: ${current.Tesla ?? 0}`;
+Tesla: ${current.Tesla ?? 0}
+Zoox: ${current.Zoox ?? 0};
+
+Source: https://txmccs.txdmv.gov/automated-vehicles/operators
+@SawyerMerritt @wholemars
+`;
 
     const mailOptions = {
         from: `"TxMCCS Scraper" <${username}>`,
