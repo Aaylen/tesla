@@ -1,8 +1,6 @@
 name: TxMCCS Scraper
 
 on:
-  schedule:
-    - cron: '0 * * * *'  # Runs once an hour
   workflow_dispatch:     # Allows manual trigger
 
 jobs:
